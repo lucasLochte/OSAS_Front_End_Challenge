@@ -2,19 +2,41 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 
 export default function Planets(){
+
     const [planets, setPlanets] = useState([]);
+    const [dataPagination, setDataPagination] = useState();
     const [loading, setLoading] = useState(true);
+    const [loadingPagination, setLoadingPagination] = useState(false);
 
     useEffect(()=> {
         async function loadPlanets(){
             const response = await api.get('planets');
-            console.log(response)
+
             setPlanets(response.data.results);
+            setDataPagination(response.data);
             setLoading(false);
         }
 
         loadPlanets();
     }, [])
+
+    async function handleMore(){
+        setLoadingPagination(true);
+        if (dataPagination.next !== null){
+            const index = dataPagination.next.indexOf('planets');
+            const substring = dataPagination.next.substring(index);
+
+            const response = await api.get(substring);
+            setPlanets(planets => [...planets, ...response.data.results]);
+            setDataPagination(response.data);
+            setLoadingPagination(false);
+
+        }
+        else{
+            setLoadingPagination(false);
+        }
+        
+    }
 
     if (loading){
         return(
@@ -52,6 +74,11 @@ export default function Planets(){
                     })}
                 </tbody>
             </table>
+
+            <div className="div-btn">
+                {loadingPagination && <h3>Carregando...</h3>}
+                {!loadingPagination && dataPagination.next !== null && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+            </div>
        
     
         </div>

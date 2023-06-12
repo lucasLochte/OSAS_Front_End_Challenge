@@ -2,19 +2,41 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 
 export default function Species(){
+
     const [species, setSpecies] = useState([]);
+    const [dataPagination, setDataPagination] = useState();
     const [loading, setLoading] = useState(true);
+    const [loadingPagination, setLoadingPagination] = useState(false);
 
     useEffect(()=> {
         async function loadSpecies(){
             const response = await api.get('species');
-            console.log(response.data)
+
             setSpecies(response.data.results);
+            setDataPagination(response.data);
             setLoading(false);
         }
 
         loadSpecies();
     }, [])
+
+    async function handleMore(){
+        setLoadingPagination(true);
+        if (dataPagination.next !== null){
+            const index = dataPagination.next.indexOf('species');
+            const substring = dataPagination.next.substring(index);
+
+            const response = await api.get(substring);
+            setSpecies(species => [...species, ...response.data.results]);
+            setDataPagination(response.data);
+            setLoadingPagination(false);
+
+        }
+        else{
+            setLoadingPagination(false);
+        }
+        
+    }
 
     if (loading){
         return(
@@ -50,6 +72,11 @@ export default function Species(){
                     })}
                 </tbody>
             </table>
+
+            <div className="div-btn">
+                {loadingPagination && <h3>Carregando...</h3>}
+                {!loadingPagination && dataPagination.next !== null && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+            </div>
        
     
         </div>
