@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import Modal from "../../components/Modal";
+import { FiSearch } from 'react-icons/fi';
 
 export default function Vehicles(){
 
@@ -7,6 +9,9 @@ export default function Vehicles(){
     const [dataPagination, setDataPagination] = useState();
     const [loading, setLoading] = useState(true);
     const [loadingPagination, setLoadingPagination] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+    const [details, setDetails] = useState();
 
     useEffect(()=> {
         async function loadVehicles(){
@@ -38,6 +43,11 @@ export default function Vehicles(){
         
     }
 
+    function handleDetails(item){
+        setShowModal(!showModal);
+        setDetails(item);
+    }
+
     if (loading){
         return(
             <div>
@@ -47,42 +57,55 @@ export default function Vehicles(){
     }
 
     return(
-        <div className="films">
-           
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Modelo</th>
-                        <th>Carga Máxima</th>
-                        <th>Passageiros</th>
-                        <th>Fabricante</th>
-                        <th>Equipe</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {vehicles.map((item, index) => {
-                                return(
-                                    <tr key={index}> 
-                                        <td><strong>{item.name}</strong></td>
-                                        <td>{item.model}</td>
-                                        <td>{item.cargo_capacity}</td>
-                                        <td>{item.passengers}</td>
-                                        <td>{item.manufacturer}</td>
-                                        <td>{item.crew}</td>
-                    
-                                    </tr>
-                                );
-                    })}
-                </tbody>
-            </table>
+        <div>
+            <div className="films">
+            
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Modelo</th>
+                            <th>Carga Máxima</th>
+                            <th>Passageiros</th>
+                            <th>Fabricante</th>
+                            <th>Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {vehicles.map((item, index) => {
+                                    return(
+                                        <tr key={index}> 
+                                            <td><strong>{item.name}</strong></td>
+                                            <td>{item.model}</td>
+                                            <td>{item.cargo_capacity}</td>
+                                            <td>{item.passengers}</td>
+                                            <td>{item.manufacturer}</td>
+                                            <td>   
+                                                <FiSearch size={25} color="#121212"  className="search"
+                                                onClick={() => handleDetails(item)}/>          
+                                            </td>
 
-            <div className="div-btn">
-                {loadingPagination && <h3>Carregando...</h3>}
-                {!loadingPagination && dataPagination.next !== null && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+                        
+                                        </tr>
+                                    );
+                        })}
+                    </tbody>
+                </table>
+
+                <div className="div-btn">
+                    {loadingPagination && <h3>Carregando...</h3>}
+                    {!loadingPagination && dataPagination.next !== null && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+                </div>
+        
+        
             </div>
-       
-    
+
+            {showModal && (
+                <Modal
+                    content={details}
+                    close={() => setShowModal(!showModal)}
+                />
+            )}
         </div>
     )
 }
